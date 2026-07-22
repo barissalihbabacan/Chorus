@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 480" width="100%" height="auto" style="background:#0d1117; border-radius:16px;">
+  <title>Chorus - Architecture and Layer Separation Diagram</title>
+  <defs>
+    <linearGradient id="arch-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d1117"/>
+      <stop offset="100%" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="layer-http" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="layer-service" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="layer-domain" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <linearGradient id="layer-repo" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e11d48"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Frame -->
+  <rect x="2" y="2" width="1196" height="476" rx="14" fill="url(#arch-bg)" stroke="#30363d" stroke-width="2"/>
+
+  <!-- Title & Description -->
+  <text x="50" y="50" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="22" font-weight="700" fill="#f8fafc">Architecture &amp; Layer Separation</text>
+  <text x="50" y="75" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" fill="#94a3b8">Strict top-down dependency flow: HTTP Layer → Service Layer → Domain Models ← Persistence Abstraction</text>
+
+  <!-- Flow Diagrams / Boxes -->
+  <!-- 1. Client & HTTP Transport Layer -->
+  <g transform="translate(50, 110)">
+    <rect x="0" y="0" width="250" height="320" rx="10" fill="#161b22" stroke="#0284c7" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="38" rx="10" fill="url(#layer-http)"/>
+    <text x="125" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">1. HTTP TRANSPORT LAYER</text>
+
+    <!-- Details -->
+    <g transform="translate(15, 55)">
+      <rect x="0" y="0" width="220" height="50" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#38bdf8">net/http Router</text>
+      <text x="14" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">Go 1.22+ ServeMux routing</text>
+
+      <rect x="0" y="62" width="220" height="50" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#38bdf8">Middleware Stack</text>
+      <text x="14" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">slog Logger &amp; Recoverer</text>
+
+      <rect x="0" y="124" width="220" height="65" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#38bdf8">HTTP Handlers</text>
+      <text x="14" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">Parse JSON payload &amp;</text>
+      <text x="14" y="55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">write envelope response</text>
+
+      <rect x="0" y="200" width="220" height="50" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#38bdf8">httputil Helpers</text>
+      <text x="14" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">Safe DecodeJSON + MaxBytes</text>
+    </g>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <g transform="translate(305, 250)">
+    <path d="M 0,0 L 40,0" stroke="#06b6d4" stroke-width="2" stroke-dasharray="4 4"/>
+    <polygon points="40,-4 48,0 40,4" fill="#06b6d4"/>
+  </g>
+
+  <!-- 2. Service Layer -->
+  <g transform="translate(358, 110)">
+    <rect x="0" y="0" width="250" height="320" rx="10" fill="#161b22" stroke="#10b981" stroke-width="1.5"/>
+    <rect x="0" y="0" width="250" height="38" rx="10" fill="url(#layer-service)"/>
+    <text x="125" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">2. SERVICE LAYER</text>
+
+    <g transform="translate(15, 55)">
+      <rect x="0" y="0" width="220" height="70" rx="6" fill="#064e3b" fill-opacity="0.3" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#34d399">identity.Service</text>
+      <text x="14" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">Validation, email checks,</text>
+      <text x="14" y="55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">usr_ identity creation</text>
+
+      <rect x="0" y="82" width="220" height="70" rx="6" fill="#064e3b" fill-opacity="0.3" stroke="#047857" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#34d399">thread.Service</text>
+      <text x="14" y="40" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">Thread management &amp;</text>
+      <text x="14" y="55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#cbd5e1">message append logic</text>
+
+      <rect x="0" y="164" width="220" height="86" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#38bdf8">Injected Dependencies</text>
+      <text x="14" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#a7f3d0">• idgen.IDGenerator</text>
+      <text x="14" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#a7f3d0">• Clock (func() time.Time)</text>
+      <text x="14" y="74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#a7f3d0">• Repository Interface</text>
+    </g>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <g transform="translate(613, 250)">
+    <path d="M 0,0 L 40,0" stroke="#10b981" stroke-width="2" stroke-dasharray="4 4"/>
+    <polygon points="40,-4 48,0 40,4" fill="#10b981"/>
+  </g>
+
+  <!-- 3. Domain Layer -->
+  <g transform="translate(666, 110)">
+    <rect x="0" y="0" width="210" height="320" rx="10" fill="#161b22" stroke="#8b5cf6" stroke-width="1.5"/>
+    <rect x="0" y="0" width="210" height="38" rx="10" fill="url(#layer-domain)"/>
+    <text x="105" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">3. CORE DOMAIN</text>
+
+    <g transform="translate(15, 55)">
+      <rect x="0" y="0" width="180" height="60" rx="6" fill="#2e1065" stroke="#6d28d9" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#c4b5fd">Identity Model</text>
+      <text x="14" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#ddd6fe">SSOT Struct + JSON</text>
+
+      <rect x="0" y="72" width="180" height="60" rx="6" fill="#2e1065" stroke="#6d28d9" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#c4b5fd">Thread &amp; Message</text>
+      <text x="14" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#ddd6fe">SSOT Struct + JSON</text>
+
+      <rect x="0" y="144" width="180" height="106" rx="6" fill="#2e1065" stroke="#6d28d9" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#c4b5fd">Domain Errors</text>
+      <text x="14" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#f43f5e">• ErrNotFound</text>
+      <text x="14" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#f43f5e">• ErrAlreadyExists</text>
+      <text x="14" y="74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#f43f5e">• ErrValidation</text>
+      <text x="14" y="90" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#f43f5e">• ErrInternal</text>
+    </g>
+  </g>
+
+  <!-- Arrow 3 -> 4 -->
+  <g transform="translate(881, 250)">
+    <path d="M 0,0 L 40,0" stroke="#f43f5e" stroke-width="2" stroke-dasharray="4 4"/>
+    <polygon points="40,-4 48,0 40,4" fill="#f43f5e"/>
+  </g>
+
+  <!-- 4. Persistence Layer -->
+  <g transform="translate(934, 110)">
+    <rect x="0" y="0" width="215" height="320" rx="10" fill="#161b22" stroke="#f43f5e" stroke-width="1.5"/>
+    <rect x="0" y="0" width="215" height="38" rx="10" fill="url(#layer-repo)"/>
+    <text x="107" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">4. PERSISTENCE</text>
+
+    <g transform="translate(15, 55)">
+      <rect x="0" y="0" width="185" height="85" rx="6" fill="#881337" fill-opacity="0.3" stroke="#be123c" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#fda4af">repository/memory</text>
+      <text x="14" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#fecdd3">Thread-safe in-memory</text>
+      <text x="14" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#fecdd3">sync.RWMutex stores</text>
+      <text x="14" y="74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#34d399">Active Implementation</text>
+
+      <rect x="0" y="98" width="185" height="152" rx="6" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+      <text x="14" y="22" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="700" fill="#94a3b8">Future Git Backend</text>
+      <text x="14" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">• Append-only commits</text>
+      <text x="14" y="58" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">• Git tree store</text>
+      <text x="14" y="74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="11" fill="#64748b">• Flat JSON files</text>
+      <text x="14" y="110" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11" fill="#fbbf24">Pluggable Contract</text>
+    </g>
+  </g>
+</svg>

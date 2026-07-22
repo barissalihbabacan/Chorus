@@ -1,65 +1,88 @@
-# Chorus
+<div align="center">
 
-Chorus is an open-source, anonymous discussion platform designed for privacy-preserving, thread-isolated conversations across languages.
+![Chorus Hero Header](assets/readme/hero.svg)
+
+<br/>
+
+[![Go Version](https://img.shields.io/badge/Go-1.22%2B-00ADD8?style=flat-square&logo=go)](https://go.dev)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+[![Architecture: Clean](https://img.shields.io/badge/Architecture-SoC%20%7C%20SSOT-emerald?style=flat-square)](#architecture)
+[![Build Status](https://img.shields.io/badge/Tests-Passing-brightgreen?style=flat-square)](#development)
+
+---
+
+[Key Features](#features) • [Why Chorus?](#why-chorus) • [Philosophy](#philosophy) • [Architecture](#architecture) • [Roadmap](#roadmap) • [Getting Started](#development)
+
+</div>
+
+<br />
+
+> [!NOTE]  
+> **Core Concept**: In Chorus, participants do not create account profiles. Every discussion thread automatically generates a temporary, cryptographically isolated identity that exists *only* within that thread.
+
+<br />
 
 ## Why Chorus?
 
-Most online communication platforms force users to build permanent online identities, construct follower networks, and compete for engagement metrics. Over time, these incentives prioritize identity over substance, encourage echo chambers, and foster self-censorship.
+Most online communication platforms force users to build permanent profiles, accumulate follower counts, and compete for algorithmic engagement metrics. Over time, these mechanics shift incentives away from thoughtful discussion toward reputation management, echo chambers, and self-censorship.
 
-Additionally, existing global forums often force automatic machine translations that flatten nuance or fragment communities into language silos.
+Furthermore, traditional global forums either isolate users into language silos or force aggressive auto-translations that strip away context and cultural nuance.
 
-Chorus addresses these challenges by eliminating permanent user accounts and replacing them with thread-isolated identities. Participants engage in discussions without personal profiles or historical reputational bias. Optional on-demand translation allows readers to access content in their preferred language without obscuring original posts.
+```text
+Traditional Platforms                       Chorus
+┌──────────────────────────────┐            ┌──────────────────────────────┐
+│ • Permanent Profiles         │            │ • Ephemeral Thread Identifier│
+│ • Followers & Karma          │    vs      │ • Zero Account Creation      │
+│ • Algorithmic Feeds          │            │ • Strict Chronological Feed  │
+│ • Forced Auto-Translation    │            │ • On-Demand Reader Translation│
+└──────────────────────────────┘            └──────────────────────────────┘
+```
+
+Chorus solves these structural flaws by decoupling discussion from persistent user identity and providing on-demand translation controls.
+
+---
 
 ## Philosophy
 
-Chorus is built around ten core principles:
+Chorus adheres strictly to ten architectural and product principles:
 
-- **Anonymous by default**: No account registration, email addresses, or credentials required.
-- **No usernames**: Identifiers are ephemeral and generated per session or thread.
-- **No followers**: Social graphs and follower counts do not exist.
-- **No profiles**: Historical posting activity is not aggregated or attached to users.
-- **No algorithms**: Content is displayed chronologically without engagement-driven ranking.
-- **Discussions over identities**: Conversations focus on message content rather than author identity.
-- **Translation is optional**: Content is preserved in its original language, with on-demand translation triggered by the reader.
-- **Open source**: Source code, architecture, and deployment models are fully transparent.
-- **Privacy first**: Minimal metadata collection with zero persistent personal tracking.
-- **Responsible by design**: Built-in mechanisms to report and moderate content while preserving participant anonymity.
+| Principle | Description |
+| :--- | :--- |
+| **Anonymous by Default** | Zero registration, email collection, or credential storage. |
+| **No Usernames** | Ephemeral identity tokens generated automatically per thread session. |
+| **No Followers** | No social graph, follower lists, or networking mechanisms. |
+| **No Profiles** | User activity history is never tracked, aggregated, or displayed. |
+| **No Algorithms** | Discussions are rendered strictly in chronological order. |
+| **Substance over Identity** | Focus is placed entirely on message content rather than author reputation. |
+| **Optional Translation** | Original text is preserved; readers trigger translation on demand. |
+| **Privacy First** | Zero telemetry, zero persistent user tracking, minimal metadata. |
+| **Open Source** | Fully audit-able codebase, standard library backend, transparent design. |
+| **Responsible by Design** | Built-in participant reporting and thread-level moderation controls. |
+
+---
 
 ## Features
 
-- **Ephemeral Thread Identities**: A unique, temporary identity is generated when participating in a thread. The identity cannot be correlated across different threads.
-- **Thread & Message Operations**: Clean HTTP endpoints to create threads, retrieve discussion history, and post messages.
-- **Optional Country Flags**: Optional geographic flag display based on coarse IP geolocation.
-- **On-Demand Translation**: Readers choose when to translate individual messages, keeping original text primary.
-- **Append-Only Git Persistence**: Designed to use Git repositories as an immutable, transparent storage backend.
-- **Zero Global State Backend**: Go HTTP service designed around clean layer boundaries, explicit dependency injection, and in-memory or Git-backed persistence.
+- **Thread-Isolated Identities**: Submitting a post generates a temporary `usr_<hex>` identifier unique to that specific thread. The identity cannot be linked across multiple threads.
+- **On-Demand Translation**: Readers control when and if a post is translated into their local language, keeping original text primary.
+- **Optional Country Flags**: Coarse IP-based geographic flag indicators provide global context without revealing precise locations.
+- **Append-Only Git Persistence**: Designed to use a Git repository as a transparent, immutable persistence layer.
+- **Zero Global State Backend**: Go service designed around Separation of Concerns (SoC), Single Source of Truth (SSOT), and explicit dependency injection.
+
+---
 
 ## Architecture
 
-The diagram below illustrates the relationship between the client, HTTP handlers, domain services, and the persistence engine.
+![Chorus Architecture Diagram](assets/readme/architecture.svg)
 
-```mermaid
-graph TD
-    Client["Client (React / TypeScript)"] -->|HTTP / JSON| Router["HTTP Router & Middleware"]
-    Router --> Handlers["HTTP Handlers"]
-    
-    subgraph Service Layer
-        Handlers --> IdentityService["Identity Service"]
-        Handlers --> ThreadService["Thread Service"]
-    end
-    
-    subgraph Core Domain
-        IdentityService --> IdentityDomain["Identity Model & Rules"]
-        ThreadService --> ThreadDomain["Thread & Message Model"]
-    end
-    
-    subgraph Storage Layer
-        IdentityService --> RepoInterface["Repository Interface"]
-        ThreadService --> RepoInterface
-        RepoInterface --> MemoryRepo["In-Memory Store"]
-        RepoInterface --> GitRepo["Git Repository Store (Planned)"]
-    end
-```
+Chorus is structured into strict architectural layers where every component depends only on the layer below it:
+
+1. **HTTP Transport Layer**: Route declarations (`net/http`), request parsing (`httputil`), `slog` logging, and panic recovery middleware.
+2. **Service Layer**: Business validation, ephemeral identity generation (`idgen`), thread management, and message append logic.
+3. **Core Domain**: Single Source of Truth (SSOT) entities (`Identity`, `Thread`, `Message`) and domain errors (`ErrNotFound`, `ErrValidation`).
+4. **Persistence Layer**: Thread-safe in-memory repository (`sync.RWMutex`) designed to swap seamlessly with an append-only Git storage engine.
+
+---
 
 ## Project Structure
 
@@ -67,66 +90,70 @@ graph TD
 chorus/
 ├── cmd/
 │   └── server/
-│       └── main.go           # Application entrypoint and composition root
+│       └── main.go           # Application entrypoint & dependency injection root
 ├── internal/
-│   ├── config/               # Application configuration loading
-│   ├── domain/               # Core domain errors and shared models
-│   ├── http/                 # HTTP routing, middleware, handlers, and rendering
-│   │   ├── handler/          # HTTP request handlers and consumer interfaces
-│   │   ├── httputil/         # Request decoding and response writing utilities
-│   │   ├── middleware/       # Structured logging and panic recovery
-│   │   └── router.go         # Endpoint routing setup
+│   ├── config/               # Environment configuration loader
+│   ├── domain/               # Core domain errors and sentinel types
+│   ├── http/                 # Transport layer
+│   │   ├── handler/          # HTTP handlers & consumer service interfaces
+│   │   ├── httputil/         # Request decoding & response rendering helpers
+│   │   ├── middleware/       # slog logging & panic recovery middleware
+│   │   └── router.go         # Endpoint route declarations (Go 1.22+ net/http)
 │   ├── idgen/                # Cryptographic ID generator package
-│   ├── identity/             # Identity domain logic and service implementation
-│   ├── repository/           # Persistence layer implementations
-│   │   └── memory/           # Thread-safe in-memory repository
-│   └── thread/               # Thread and message domain logic and service
+│   ├── identity/             # Identity domain logic & service implementation
+│   ├── repository/           # Persistence layer
+│   │   └── memory/           # Thread-safe in-memory store
+│   └── thread/               # Thread & message domain logic & service
 ├── go.mod                    # Go module definition
 └── README.md
 ```
 
+---
+
 ## Roadmap
 
-- [x] HTTP server
-- [x] Identity system
-- [x] Thread service
-- [ ] Git repository storage
-- [ ] Translation
-- [ ] Reports
-- [ ] Moderation
-- [ ] Realtime updates
+- [x] **Core HTTP Server**: Standard library router with structured `slog` logging and panic recovery middleware.
+- [x] **Identity Service**: Ephemeral cryptographic identity generation (`usr_<hex>`).
+- [x] **Thread & Message Service**: Creation, retrieval, and listing operations for threads and messages.
+- [ ] **Git-Backed Persistence**: Immutable append-only Git repository storage engine.
+- [ ] **On-Demand Translation**: Translation integration with reader-side triggering.
+- [ ] **Geographic Flags**: Coarse IP geolocation for optional country flag tags.
+- [ ] **Moderation Tools**: Participant abuse reporting and community moderation workflows.
+- [ ] **Realtime Updates**: Server-Sent Events (SSE) / WebSocket live message streaming.
+
+---
 
 ## Development
 
 ### Prerequisites
 
-- Go 1.22 or higher
+- **Go**: 1.22 or higher
 
-### Building
+### Compiling
 
-To compile the server binary:
+To build the standalone server binary:
 
 ```bash
 go build -o server ./cmd/server
 ```
 
-### Running
+### Running Locally
 
-To run the server locally:
+To start the server:
 
 ```bash
 go run ./cmd/server
 ```
 
-By default, the server listens on port `8080`. Configuration can be overridden using environment variables:
+The server listens on port `8080` by default. Configuration can be customized via environment variables:
 
 ```bash
 PORT=9090 ENV=production go run ./cmd/server
 ```
 
-### Testing
+### Testing & Verification
 
-Run the full unit and integration test suite with the race detector enabled:
+Run all unit and integration tests with the Go race detector enabled:
 
 ```bash
 go test -v -race ./...
@@ -138,11 +165,15 @@ Run static analysis:
 go vet ./...
 ```
 
+---
+
 ## Contributing
 
-Contributions are welcome. Please ensure that all pull requests maintain clean architectural layer boundaries, pass unit tests with the race detector enabled (`go test -v -race ./...`), and include appropriate test coverage.
+Contributions are welcome. Please ensure all pull requests strictly maintain layer boundaries, pass unit tests with the race detector enabled (`go test -v -race ./...`), and include clear test coverage.
 
-For major architectural changes or new feature proposals, please open an issue first to discuss the proposed design.
+For major architectural proposals, please open an issue first to discuss the design before submitting code.
+
+---
 
 ## License
 
