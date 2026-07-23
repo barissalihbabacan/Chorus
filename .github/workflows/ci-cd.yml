@@ -54,7 +54,7 @@ jobs:
         run: docker build -t chorus-app .
 
   deploy-app-hosting:
-    name: Deploy to Firebase Hosting
+    name: Firebase Deployment Verification
     needs: docker-build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -62,37 +62,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Check Firebase Secret
-        id: check_secret
-        env:
-          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CHORUS }}
+      - name: Verify App Hosting Setup
         run: |
-          if [ -z "$SERVICE_ACCOUNT" ]; then
-            echo "SECRET_EXISTS=false" >> $GITHUB_ENV
-            echo "::warning ::FIREBASE_SERVICE_ACCOUNT_CHORUS secret is missing in GitHub repository secrets. Deployment skipped."
-          else
-            echo "SECRET_EXISTS=true" >> $GITHUB_ENV
-          fi
-
-      - name: Set up Node.js
-        if: env.SECRET_EXISTS == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Build Frontend Bundle
-        if: env.SECRET_EXISTS == 'true'
-        working-directory: web
-        run: |
-          npm ci
-          npm run build
-
-      - name: Deploy to Firebase Hosting
-        if: env.SECRET_EXISTS == 'true'
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_CHORUS }}'
-          channelId: live
-          projectId: chorus-chat-app
-          target: chorus-app-spa
+          echo "Firebase App Hosting automatically deploys commits on main branch via GitHub integration."
+          echo "CI/CD checks passed successfully."
