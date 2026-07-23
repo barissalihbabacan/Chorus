@@ -56,7 +56,7 @@ jobs:
   deploy-app-hosting:
     name: Deploy to Firebase App Hosting
     needs: docker-build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && secrets.FIREBASE_SERVICE_ACCOUNT_CHORUS != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository

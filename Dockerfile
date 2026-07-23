@@ -9,8 +9,8 @@ RUN npm run build
 # Step 2: Build Go Backend Binary
 FROM golang:1.22-alpine AS backend-builder
 WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
+COPY go.mod ./
+RUN if [ -f go.sum ]; then go mod download; fi
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o server ./cmd/server
 
