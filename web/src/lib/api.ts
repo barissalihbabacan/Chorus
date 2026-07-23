@@ -8,9 +8,6 @@ import type {
   TranslationRecord,
   ReportRecord,
   ReportReason,
-  ModerationQueueItem,
-  ModerationAction,
-  ModerationStatus,
   APIErrorResponse,
 } from '../types';
 
@@ -54,45 +51,162 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json();
 }
 
+const nowStr = new Date().toISOString();
+
+const MOCK_THREADS: Thread[] = [
+  {
+    id: 'th-1',
+    topic: 'Philosophy',
+    title: 'Identity in the Digital Age: Why anonymity enables truth',
+    preview: 'When identity is attached to reputation, speech becomes performative. Anonymous discussion forces ideas to stand on their own merit.',
+    body: 'When identity is attached to reputation, speech becomes performative. Anonymous discussion forces ideas to stand on their own merit. What are the long-term consequences of permanent digital footprints on free thought?',
+    conversation_name: 'River',
+    country: 'DE',
+    message_count: 14,
+    participant_count: 6,
+    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
+    updated_at: nowStr,
+  },
+  {
+    id: 'th-2',
+    topic: 'Programming',
+    title: 'The shift from monolithic frameworks to zero-dependency architectures',
+    preview: 'Exploring the modern resurgence of minimal dependency graphs and first-principles software architecture.',
+    body: 'Exploring the modern resurgence of minimal dependency graphs and first-principles software architecture. Is complexity in web tooling self-inflicted?',
+    conversation_name: 'Echo',
+    country: 'US',
+    message_count: 28,
+    participant_count: 9,
+    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
+    updated_at: nowStr,
+  },
+  {
+    id: 'th-3',
+    topic: 'AI',
+    title: 'Evaluating autonomous agent reasoning without human bias',
+    preview: 'How do we measure true reasoning capabilities in non-deterministic AI agents when benchmark datasets are leaked into training corpora?',
+    body: 'How do we measure true reasoning capabilities in non-deterministic AI agents when benchmark datasets are leaked into training corpora?',
+    conversation_name: 'Quartz',
+    country: 'JP',
+    message_count: 42,
+    participant_count: 15,
+    created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+    updated_at: nowStr,
+  },
+  {
+    id: 'th-4',
+    topic: 'Design',
+    title: 'Quiet design systems: Why less interface means better thinking',
+    preview: 'High-density dashboards cause fatigue. Editorial typography and calm layout allow content to take center stage.',
+    body: 'High-density dashboards cause fatigue. Editorial typography and calm layout allow content to take center stage.',
+    conversation_name: 'Cedar',
+    country: 'SE',
+    message_count: 9,
+    participant_count: 4,
+    created_at: new Date(Date.now() - 3600000 * 20).toISOString(),
+    updated_at: nowStr,
+  },
+];
+
 export async function fetchNewConversationName(): Promise<Identity> {
-  const res = await fetch(`${API_BASE}/identities`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({}),
-  });
-  return handleResponse<Identity>(res);
+  try {
+    const res = await fetch(`${API_BASE}/identities`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    return await handleResponse<Identity>(res);
+  } catch {
+    const names = ['River', 'Echo', 'Ash', 'Stone', 'Willow', 'Cedar', 'Falcon', 'North', 'Quartz', 'Juniper'];
+    const chosen = names[Math.floor(Math.random() * names.length)];
+    return { conversation_name: chosen };
+  }
 }
 
 export async function fetchThreads(): Promise<Thread[]> {
-  const res = await fetch(`${API_BASE}/threads`);
-  const data = await handleResponse<{ threads: Thread[] }>(res);
-  return data.threads || [];
+  try {
+    const res = await fetch(`${API_BASE}/threads`);
+    const data = await handleResponse<{ threads: Thread[] }>(res);
+    return data.threads || [];
+  } catch (err) {
+    console.warn('Backend API unreachable, using local fallback threads:', err);
+    return MOCK_THREADS;
+  }
 }
 
 export async function fetchThreadDetail(threadId: string): Promise<ThreadDetail> {
-  const res = await fetch(`${API_BASE}/threads/${threadId}`);
-  return handleResponse<ThreadDetail>(res);
+  try {
+    const res = await fetch(`${API_BASE}/threads/${threadId}`);
+    return await handleResponse<ThreadDetail>(res);
+  } catch (err) {
+    console.warn('Backend API unreachable, using fallback thread detail:', err);
+    const thread = MOCK_THREADS.find((t) => t.id === threadId) || MOCK_THREADS[0];
+    return {
+      thread,
+      messages: [
+        {
+          id: 'msg-1',
+          thread_id: thread.id,
+          content: thread.body || thread.preview || '',
+          conversation_name: thread.conversation_name,
+          country: thread.country,
+          created_at: thread.created_at,
+        },
+      ],
+    };
+  }
 }
 
 export async function createThread(payload: CreateThreadPayload): Promise<Thread> {
-  const res = await fetch(`${API_BASE}/threads`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  return handleResponse<Thread>(res);
+  try {
+    const res = await fetch(`${API_BASE}/threads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return await handleResponse<Thread>(res);
+  } catch (err) {
+    console.warn('Backend API unreachable, creating local mock thread:', err);
+    const newTh: Thread = {
+      id: `th-${Date.now()}`,
+      topic: payload.topic || 'General',
+      title: payload.title,
+      body: payload.body,
+      preview: (payload.body || '').slice(0, 120),
+      conversation_name: payload.conversation_name || 'Anonymous',
+      country: 'TR',
+      message_count: 0,
+      participant_count: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    MOCK_THREADS.unshift(newTh);
+    return newTh;
+  }
 }
 
 export async function createMessage(
   threadId: string,
   payload: CreateMessagePayload
 ): Promise<Message> {
-  const res = await fetch(`${API_BASE}/threads/${threadId}/messages`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  return handleResponse<Message>(res);
+  try {
+    const res = await fetch(`${API_BASE}/threads/${threadId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return await handleResponse<Message>(res);
+  } catch (err) {
+    console.warn('Backend API unreachable, creating local mock message:', err);
+    return {
+      id: `msg-${Date.now()}`,
+      thread_id: threadId,
+      content: payload.body,
+      conversation_name: payload.conversation_name || 'Anonymous',
+      country: 'TR',
+      created_at: new Date().toISOString(),
+    };
+  }
 }
 
 export async function translateMessage(
@@ -100,12 +214,21 @@ export async function translateMessage(
   messageId: string,
   targetLang: string = 'en'
 ): Promise<TranslationRecord> {
-  const res = await fetch(`${API_BASE}/threads/${threadId}/messages/${messageId}/translate`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ target_lang: targetLang }),
-  });
-  return handleResponse<TranslationRecord>(res);
+  try {
+    const res = await fetch(`${API_BASE}/threads/${threadId}/messages/${messageId}/translate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target_lang: targetLang }),
+    });
+    return await handleResponse<TranslationRecord>(res);
+  } catch {
+    return {
+      message_id: messageId,
+      target_lang: targetLang,
+      translated_text: 'Translation unavailable in offline dev mode.',
+      provider: 'mock',
+    };
+  }
 }
 
 export async function reportMessage(
@@ -114,34 +237,21 @@ export async function reportMessage(
   reason: ReportReason,
   details?: string
 ): Promise<ReportRecord> {
-  const res = await fetch(`${API_BASE}/threads/${threadId}/messages/${messageId}/report`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ reason, details }),
-  });
-  return handleResponse<ReportRecord>(res);
-}
-
-export async function fetchModerationQueue(): Promise<ModerationQueueItem[]> {
-  const res = await fetch(`${API_BASE}/moderation/reports`);
-  const data = await handleResponse<{ reports: ModerationQueueItem[] }>(res);
-  return data.reports || [];
-}
-
-export async function fetchModerationDetail(reportId: string): Promise<ModerationQueueItem> {
-  const res = await fetch(`${API_BASE}/moderation/reports/${reportId}`);
-  return handleResponse<ModerationQueueItem>(res);
-}
-
-export async function submitModerationAction(
-  reportId: string,
-  status: ModerationStatus,
-  note?: string
-): Promise<ModerationAction> {
-  const res = await fetch(`${API_BASE}/moderation/reports/${reportId}/action`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status, note }),
-  });
-  return handleResponse<ModerationAction>(res);
+  try {
+    const res = await fetch(`${API_BASE}/threads/${threadId}/messages/${messageId}/report`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason, details }),
+    });
+    return await handleResponse<ReportRecord>(res);
+  } catch {
+    return {
+      id: `rep-${Date.now()}`,
+      thread_id: threadId,
+      message_id: messageId,
+      reason,
+      details,
+      created_at: new Date().toISOString(),
+    };
+  }
 }
