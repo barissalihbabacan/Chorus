@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "chorus-app-spa",
+    "site": "chorus-chat-app",
     "public": "web/dist",
     "ignore": [
       "firebase.json",

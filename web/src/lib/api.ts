@@ -82,70 +82,7 @@ export const SYSTEM_BOARDS: Board[] = [
   { id: 'brd_psychology', slug: 'psychology', display_name: 'Psychology', description: 'Cognition, behavior, and mental processes.' },
 ];
 
-const nowStr = new Date().toISOString();
-
-const MOCK_THREADS: Thread[] = [
-  {
-    id: 'thd_mock1',
-    topic: 'Philosophy',
-    board_slug: 'philosophy',
-    board_display_name: 'Philosophy',
-    title: 'Identity in the Digital Age: Why anonymity enables truth',
-    preview: 'When identity is attached to reputation, speech becomes performative. Anonymous discussion forces ideas to stand on their own merit.',
-    body: 'When identity is attached to reputation, speech becomes performative. Anonymous discussion forces ideas to stand on their own merit. What are the long-term consequences of permanent digital footprints on free thought?',
-    conversation_name: 'River',
-    country: 'TR',
-    message_count: 14,
-    participant_count: 6,
-    created_at: new Date(Date.now() - 3600000 * 2).toISOString(),
-    updated_at: nowStr,
-  },
-  {
-    id: 'thd_mock2',
-    topic: 'Programming',
-    board_slug: 'programming',
-    board_display_name: 'Programming',
-    title: 'The shift from monolithic frameworks to zero-dependency architectures',
-    preview: 'Exploring the modern resurgence of minimal dependency graphs and first-principles software architecture.',
-    body: 'Exploring the modern resurgence of minimal dependency graphs and first-principles software architecture. Is complexity in web tooling self-inflicted?',
-    conversation_name: 'Echo',
-    country: 'TR',
-    message_count: 28,
-    participant_count: 9,
-    created_at: new Date(Date.now() - 3600000 * 5).toISOString(),
-    updated_at: nowStr,
-  },
-  {
-    id: 'thd_mock3',
-    topic: 'AI',
-    board_slug: 'ai',
-    board_display_name: 'Artificial Intelligence',
-    title: 'Evaluating autonomous agent reasoning without human bias',
-    preview: 'How do we measure true reasoning capabilities in non-deterministic AI agents when benchmark datasets are leaked into training corpora?',
-    body: 'How do we measure true reasoning capabilities in non-deterministic AI agents when benchmark datasets are leaked into training corpora?',
-    conversation_name: 'Quartz',
-    country: 'TR',
-    message_count: 42,
-    participant_count: 15,
-    created_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-    updated_at: nowStr,
-  },
-  {
-    id: 'thd_mock4',
-    topic: 'Design',
-    board_slug: 'design',
-    board_display_name: 'Design',
-    title: 'Quiet design systems: Why less interface means better thinking',
-    preview: 'High-density dashboards cause fatigue. Editorial typography and calm layout allow content to take center stage.',
-    body: 'High-density dashboards cause fatigue. Editorial typography and calm layout allow content to take center stage.',
-    conversation_name: 'Cedar',
-    country: 'TR',
-    message_count: 9,
-    participant_count: 4,
-    created_at: new Date(Date.now() - 3600000 * 20).toISOString(),
-    updated_at: nowStr,
-  },
-];
+const MOCK_THREADS: Thread[] = [];
 
 export async function fetchBoards(): Promise<Board[]> {
   try {
