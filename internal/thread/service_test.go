@@ -38,8 +38,8 @@ func TestThreadService_Operations(t *testing.T) {
 		if th.ConversationName == "" {
 			t.Errorf("expected non-empty ConversationName")
 		}
-		if th.Country == nil || *th.Country != "US" {
-			t.Errorf("expected country US, got %v", th.Country)
+		if th.Country == nil || *th.Country != "TR" {
+			t.Errorf("expected country TR, got %v", th.Country)
 		}
 
 		threads, err := svc.ListThreads(ctx)

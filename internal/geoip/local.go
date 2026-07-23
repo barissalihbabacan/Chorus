@@ -15,7 +15,7 @@ type LocalProvider struct {
 func NewLocalProvider(defaultCountry string) *LocalProvider {
 	defaultCountry = strings.ToUpper(strings.TrimSpace(defaultCountry))
 	if defaultCountry == "" {
-		defaultCountry = "US"
+		defaultCountry = "TR"
 	}
 	return &LocalProvider{
 		defaultCountry: defaultCountry,
