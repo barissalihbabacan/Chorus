@@ -1,17 +1,20 @@
-# Chorus — Anonymous Discussion Engine
+<p align="center">
+  <img src="assets/readme/hero.svg" alt="Chorus — Anonymous Discussion Engine" width="100%">
+</p>
 
-[![CI/CD](https://github.com/joinchorus/chorus/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/joinchorus/chorus/actions/workflows/ci-cd.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8.svg)](https://go.dev)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB.svg)](https://react.dev)
+<p align="center">
+  <a href="https://github.com/joinchorus/chorus/actions/workflows/ci-cd.yml"><img src="https://github.com/joinchorus/chorus/actions/workflows/ci-cd.yml/badge.svg" alt="CI/CD Status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
+  <a href="https://go.dev"><img src="https://img.shields.io/badge/Go-1.22+-00ADD8.svg" alt="Go Version"></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/React-18.3-61DAFB.svg" alt="React 18"></a>
+  <a href="https://git-scm.com"><img src="https://img.shields.io/badge/Storage-Native_Git-F05032.svg" alt="Native Git Engine"></a>
+</p>
 
-> **Identity belongs to the conversation. Not to the person.**
-
-Chorus is an open-source, high-performance anonymous discussion platform. It eliminates traditional account registration, profile tracking, and social media mechanics (likes, followers, upvotes, algorithms) in favor of thread-scoped temporary identities, chronological reading, and native Git persistence.
+<h3 align="center">Identity belongs to the conversation. Not to the person.</h3>
 
 ---
 
-## 🔗 Project Ecosystem
+## 🌐 Project Ecosystem
 
 - 🌐 **Marketing Website:** [joinchorus.app](https://joinchorus.app)
 - 📖 **Technical Documentation:** [docs.joinchorus.app](https://docs.joinchorus.app)
@@ -19,34 +22,61 @@ Chorus is an open-source, high-performance anonymous discussion platform. It eli
 
 ---
 
-## 🚀 Architecture Highlights
+## 💡 What is Chorus?
 
-- **Go Backend (`/cmd/server`, `/internal`):** Clean architecture with domain isolation (`internal/thread`, `internal/identity`, `internal/gitstore`, `internal/geoip`).
-- **React SPA (`/web`):** Modern TypeScript, Vite, TanStack Query frontend.
-- **Git Persistence Engine (`internal/gitstore`):** Audit-proof, immutable commit log where every thread and message generates native Git commit history.
-- **Subdomain Host Router:** Subdomain dispatcher routing `chat.joinchorus.app` traffic seamlessly.
+Chorus is an open-source, high-performance anonymous discussion engine. It replaces account registration, user profile tracking, and social media mechanics (likes, upvotes, followers, ranking algorithms) with thread-scoped temporary identities, chronological reading, and an immutable Git persistence engine.
 
 ---
 
-## 🛠️ Local Quickstart
+## ⚡ Why it is Different
 
-### Prerequisites
-- **Go 1.22+**
-- **Node.js 22+**
-- **Git**
+| Traditional Social Platforms | Chorus Discussion Engine |
+| :--- | :--- |
+| Persistent user accounts & profiles | Zero accounts. No signups or OAuth tracking. |
+| Reputation, likes, karma & follower counts | No likes, upvotes, downvotes, or leaderboards. |
+| Algorithmically ranked feed loops | Pure chronological discourse. |
+| Opaque proprietary databases | Immutable, audit-proof native Git commit engine. |
+| Global identity tracking | Temporary identity assigned per thread (`River 🇹🇷`). |
 
-### 1. Run Backend Server
-```bash
-go run ./cmd/server
-# Server listens on http://localhost:8085
+---
+
+## 🛠️ Architecture & Mechanism
+
+Every thread creation and message append produces a native, cryptographic Git commit:
+
+```text
+./data/repository/
+├── .git/
+├── identities/
+│   └── <identity_id>.json
+└── threads/
+    └── <thread_id>/
+        ├── index.json
+        └── messages/
+            └── <message_id>.json
 ```
 
-### 2. Run Frontend Development Server
+Commit history remains cryptographic and tamper-proof:
+- `c19d788` &mdash; `thread: create thd_059f40`
+- `dee2875` &mdash; `message: append msg_111`
+- `32f90ec` &mdash; `message: append msg_222`
+
+---
+
+## 🚀 Quickstart
+
+### 1. Run Backend Server (Go 1.22+)
+```bash
+go run ./cmd/server
+# Server running on http://localhost:8085
+```
+
+### 2. Run Frontend Dev Server (Node.js 22+)
 ```bash
 cd web
 npm install
 npm run dev
-# Vite dev server runs on http://localhost:3000
+# Vite dev server running on http://localhost:3000
 ```
 
 ### 3. Run with Docker Compose
@@ -59,22 +89,16 @@ docker-compose up --build
 ## 🧪 Testing & Verification
 
 ```bash
-# Run backend Go test suite
+# Run backend Go unit and integration test suite
 go test -v ./...
 
-# Build React production bundle
+# Build production React SPA bundle
 cd web && npm run build
 ```
 
 ---
 
-## 📦 Deployment
-
-The application is deployed independently to **Firebase App Hosting** targeting `chat.joinchorus.app` via GitHub Actions (`.github/workflows/ci-cd.yml`).
-
----
-
 ## 📄 License & Community
 
-Distributed under the MIT License. See [LICENSE](LICENSE) for details.
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) for contribution & security guidelines.
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.  
+Read our [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) guidelines.
