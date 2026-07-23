@@ -48,7 +48,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
     setTransError(null);
 
     try {
-      const res = await translateMessage(message.thread_id, message.id, 'en');
+      const res = await translateMessage(message.thread_id, message.id, 'en', message.content);
       setTranslation(res);
       setShowTranslated(true);
     } catch (err) {

@@ -238,7 +238,7 @@ export async function createThread(payload: CreateThreadPayload): Promise<Thread
       body: payload.body,
       preview: (payload.body || '').slice(0, 120),
       conversation_name: payload.conversation_name || 'Anonymous',
-      country: 'TR',
+      country: payload.show_country ? 'TR' : null,
       message_count: 0,
       participant_count: 1,
       created_at: new Date().toISOString(),
@@ -267,7 +267,7 @@ export async function createMessage(
       thread_id: threadId,
       content: payload.body,
       conversation_name: payload.conversation_name || 'Anonymous',
-      country: 'TR',
+      country: payload.show_country ? 'TR' : null,
       created_at: new Date().toISOString(),
     };
   }
@@ -276,7 +276,8 @@ export async function createMessage(
 export async function translateMessage(
   threadId: string,
   messageId: string,
-  targetLang: string = 'en'
+  targetLang: string = 'en',
+  textToTranslate?: string
 ): Promise<TranslationRecord> {
   try {
     const res = await fetch(`${API_BASE}/threads/${threadId}/messages/${messageId}/translate`, {
@@ -286,10 +287,31 @@ export async function translateMessage(
     });
     return await handleResponse<TranslationRecord>(res);
   } catch {
+    if (textToTranslate) {
+      try {
+        const gtxUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodeURIComponent(textToTranslate)}`;
+        const gtxRes = await fetch(gtxUrl);
+        const data = await gtxRes.json();
+        let translatedText = '';
+        if (Array.isArray(data) && Array.isArray(data[0])) {
+          translatedText = data[0].map((part: any) => part && part[0] ? part[0] : '').join('');
+        }
+        if (translatedText) {
+          return {
+            message_id: messageId,
+            target_lang: targetLang,
+            translated_text: translatedText,
+            provider: 'google_web',
+          };
+        }
+      } catch {
+        // Fallback
+      }
+    }
     return {
       message_id: messageId,
       target_lang: targetLang,
-      translated_text: 'Translation unavailable in offline dev mode.',
+      translated_text: textToTranslate || 'Translation unavailable in offline dev mode.',
       provider: 'mock',
     };
   }
